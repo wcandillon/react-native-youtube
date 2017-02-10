@@ -46,28 +46,18 @@ export default class YouTube extends Component {
         loop: false
     };
 
-    _root: any;
-    _exportedProps: any;
-
-    setNativeProps(nativeProps: any) {
-        this._root.setNativeProps(nativeProps);
-    }
-
-    constructor(props: any) {
+    constructor(props) {
         super(props);
         this._exportedProps = NativeModules.YouTubeManager && NativeModules.YouTubeManager.exportedProps;
     }
-
-
-    seekTo(seconds: number){
-        NativeModules.YouTubeManager.seekTo(ReactNative.findNodeHandle(this), parseInt(seconds, 10));
+    stopVideo() {
+        NativeModules.YouTubeManager.stopVideo(ReactNative.findNodeHandle(this));
     }
-
-    render() {
-        var style = [styles.base, this.props.style];
-        var nativeProps = Object.assign({}, this.props);
-        nativeProps.style = style;
-        return <RCTYouTube ref={component => { this._root = component; }} {...nativeProps} />;
+    pauseVideo() {
+        NativeModules.YouTubeManager.pauseVideo(ReactNative.findNodeHandle(this));
+    }
+    seekTo(seconds){
+        NativeModules.YouTubeManager.seekTo(ReactNative.findNodeHandle(this), parseInt(seconds, 10));
     }
     componentWillMount() {
         changeEvent = NativeAppEventEmitter.addListener(
@@ -93,45 +83,46 @@ export default class YouTube extends Component {
         progressEvent.remove()
         errorEvent.remove()
     }
-
-    componentDidUpdate() {
+    render() {
+        var style = [styles.base, this.props.style];
         var nativeProps = Object.assign({}, this.props);
-      /*
-       * Try to use `playerParams` instead of settings `playsInline` and
-       * `videoId` individually.
-       */
+        nativeProps.style = style;
+
+        /*
+         * Try to use `playerParams` instead of settings `playsInline` and
+         * `videoId` individually.
+         */
         if (this._exportedProps) {
             if (this._exportedProps.playerParams) {
                 nativeProps.playerParams = {
                     videoId: this.props.videoId,
-                    playerVars: {},
                 };
-                // Make sure we leave it in as the nativeProps,
-                // since future setNativeProps() calls will depend on it existing.
-                //delete nativeProps.videoId;
+                delete nativeProps.videoId;
+
+                nativeProps.playerParams.playerVars = {};
 
                 if (this.props.playsInline) {
                     nativeProps.playerParams.playerVars.playsinline = 1;
                     delete nativeProps.playsInline;
-                }
+                };
                 if (this.props.modestbranding) {
                     nativeProps.playerParams.playerVars.modestbranding = 1;
                     delete nativeProps.modestbranding;
-                }
+                };
 
-                if (this.props.showinfo !== undefined) {
+                if (this.props.showinfo!==undefined) {
                     nativeProps.playerParams.playerVars.showinfo = this.props.showinfo ? 1 : 0;
                     delete nativeProps.showinfo;
-                }
-                if (this.props.controls !== undefined) {
+                };
+                if (this.props.controls!==undefined) {
                     nativeProps.playerParams.playerVars.controls = this.props.controls;
                     delete nativeProps.controls;
-                }
-                if (this.props.origin !== undefined) {
+                };
+                if (this.props.origin!==undefined) {
                     nativeProps.playerParams.playerVars.origin = this.props.origin;
                     delete nativeProps.origin;
-                }
-                if (this.props.rel !== undefined) {
+                };
+                if (this.props.rel!==undefined) {
                     nativeProps.playerParams.playerVars.rel = this.props.rel ? 1 : 0;
                     delete nativeProps.rel;
                 };
@@ -141,14 +132,15 @@ export default class YouTube extends Component {
                 };
             };
         } else {
-          /*
-           * For compatibility issues with an older version where setting both
-           * `playsInline` and `videoId` in quick succession would cause the video
-           * to sometimes not play.
-           */
+            /*
+             * For compatibility issues with an older version where setting both
+             * `playsInline` and `videoId` in quick succession would cause the video
+             * to sometimes not play.
+             */
             delete nativeProps.playsInline;
         }
-        this._root.setNativeProps(nativeProps);
+
+        return <RCTYouTube {... nativeProps} />;
     }
 }
 
