@@ -21,6 +21,8 @@ let readyEvent = null
 let changeEvent = null
 let progressEvent = null
 let errorEvent = null
+let enterFullScreen = null
+let exitFullScreen = null
 
 export default class YouTube extends Component {
     static propTypes = {
@@ -39,7 +41,9 @@ export default class YouTube extends Component {
         onChangeQuality: PropTypes.func,
         onError: PropTypes.func,
         loop: PropTypes.bool,
-        fs: PropTypes.bool
+        fs: PropTypes.bool,
+        onFullScreenEnter: PropTypes.func,
+        onFullScreenExit: PropTypes.func
     };
 
     static defaultProps = {
@@ -76,12 +80,22 @@ export default class YouTube extends Component {
                 'youtubeVideoError',
                 (event) => this.props.onError && this.props.onError(event)
     )
+        enterFullScreen = NativeAppEventEmitter.addListener(
+            'youtubeVideoEnterFullScreen',
+            (event) => this.props.onFullScreenEnter && this.props.onFullScreenEnter()
+        )
+        exitFullScreen = NativeAppEventEmitter.addListener(
+            'youtubeVideoExitFullScreen',
+            (event) => this.props.onFullScreenExit && this.props.onFullScreenExit()
+        )
     }
     componentWillUnmount() {
         changeEvent.remove()
         readyEvent.remove()
         progressEvent.remove()
         errorEvent.remove()
+        enterFullScreen.remove()
+        exitFullScreen.remove()
     }
     render() {
         var style = [styles.base, this.props.style];
