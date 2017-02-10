@@ -82,7 +82,7 @@
 - (void)playerFullScreenStateChange:(NSNotification*)notification
 {
     if((UIWindow*)notification.object == self.window && !_enteredFullScreen) {
-        [_eventDispatcher sendInputEventWithName:@"youtubeVideoEnterFullScreen"
+        [_eventDispatcher sendAppEventWithName:@"youtubeVideoEnterFullScreen"
                                             body:@{
                                                    @"target": self.reactTag
                                                    }];
@@ -90,7 +90,7 @@
         _enteredFullScreen = YES;
     }
     if ((UIWindow*)notification.object != self.window && _enteredFullScreen) {
-        [_eventDispatcher sendInputEventWithName:@"youtubeVideoExitFullScreen"
+        [_eventDispatcher sendAppEventWithName:@"youtubeVideoExitFullScreen"
                                             body:@{
                                                    @"target": self.reactTag
                                                    }];
@@ -98,6 +98,7 @@
                                                 withAnimation:UIStatusBarAnimationFade];
         _enteredFullScreen = NO;
     }
+
 }
 
 #pragma mark - YTPlayer control methods
